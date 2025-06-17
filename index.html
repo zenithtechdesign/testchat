@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Widget Content</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* Styles de base pour le widget DANS l'iframe */
         html, body {
@@ -12,23 +15,21 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            background-color: transparent; /* Fond transparent pour voir la page derrière */
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: transparent;
+            font-family: 'Inter', sans-serif;
         }
         .glass-effect {
-            background: rgba(255, 255, 255, 0.3); 
-            -webkit-backdrop-filter: blur(14px);
-            backdrop-filter: blur(14px);
+            background: rgba(255, 255, 255, 0.4); 
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
             border: 1px solid rgba(255, 255, 255, 0.2); 
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); 
         }
-        #chat-session-messages::-webkit-scrollbar { width: 6px; }
-        #chat-session-messages::-webkit-scrollbar-track { background: transparent; }
-        #chat-session-messages::-webkit-scrollbar-thumb {
+        #chat-widget-messages::-webkit-scrollbar { width: 6px; }
+        #chat-widget-messages::-webkit-scrollbar-track { background: transparent; }
+        #chat-widget-messages::-webkit-scrollbar-thumb {
             background-color: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            border: 2px solid transparent;
-            background-clip: content-box;
         }
         @keyframes typing-bounce {
             0%, 60%, 100% { transform: scale(0.4); }
@@ -40,27 +41,18 @@
     </style>
 </head>
 <body>
-    <!-- 
-      Le widget n'a plus besoin d'être 'fixed' car il est dans une iframe qui le sera.
-      Il n'y a plus de bouton d'ouverture ici.
-    -->
-    <div id="chat-session-window" class="glass-effect rounded-3xl h-full w-full flex flex-col">
-        <!-- COUCHE DE CONTENU -->
+    <div id="chat-widget-window" class="glass-effect rounded-3xl h-full w-full flex flex-col">
         <div class="relative z-10 h-full flex flex-col p-3">
-            <!-- En-tête -->
             <div class="flex-shrink-0 pb-2 border-b border-white/30 flex items-center justify-between">
                 <h3 class="font-bold text-lg text-gray-900">Assistant</h3>
-                 <button id="chat-session-close-button" class="text-gray-700 hover:text-gray-900 transition-colors">
+                 <button id="chat-widget-close-button" class="text-gray-700 hover:text-gray-900 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
             
-            <!-- Zone des Messages -->
-            <div id="chat-session-messages" class="flex-grow p-2 overflow-y-auto flex flex-col space-y-3">
-                <div class="chat-session-message bot-message flex">
-                    <div class="p-3 rounded-2xl rounded-bl-lg bg-white/70 text-gray-800 max-w-[85%]">
-                        Bonjour ! Comment puis-je vous aider ?
-                    </div>
+            <div id="chat-widget-messages" class="flex-grow p-2 overflow-y-auto flex flex-col space-y-3">
+                <div class="chat-message bot-message flex">
+                    <div class="p-3 rounded-2xl rounded-bl-lg bg-white/70 text-gray-800 max-w-[85%]">Bonjour ! Comment puis-je vous aider ?</div>
                 </div>
                 <div id="chat-typing-indicator" class="hidden">
                     <div class="flex items-center space-x-1.5 p-3 rounded-2xl rounded-bl-lg bg-white/70">
@@ -71,11 +63,10 @@
                 </div>
             </div>
 
-            <!-- Formulaire de saisie -->
             <div class="flex-shrink-0 pt-2 border-t border-white/30">
-                <form id="chat-session-form" class="flex items-center space-x-2">
-                    <input type="text" id="chat-session-input" placeholder="Envoyer un message..." class="bg-white/50 w-full h-12 px-4 rounded-full border border-white/40 focus:ring-2 focus:ring-blue-400 focus:outline-none text-gray-900 placeholder-gray-700 transition-shadow">
-                    <button type="submit" id="chat-session-send-btn" class="w-12 h-12 flex-shrink-0 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white/30">
+                <form id="chat-widget-form" class="flex items-center space-x-2">
+                    <input type="text" id="chat-widget-input" placeholder="Envoyer un message..." class="bg-white/50 w-full h-12 px-4 rounded-full border border-white/40 focus:ring-2 focus:ring-blue-400 focus:outline-none text-gray-900 placeholder-gray-700 transition-shadow">
+                    <button type="submit" class="w-12 h-12 flex-shrink-0 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform rotate-45 -translate-y-px" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
                     </button>
                 </form>
@@ -84,25 +75,23 @@
     </div>
 
     <script>
-    (function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const n8nWebhookUrl = 'https://doc2ai.ch/webhook/5d2ac8b3-e232-4781-ac17-66a080051528';
-        const closeButton = document.getElementById('chat-session-close-button');
-        const chatForm = document.getElementById('chat-session-form');
-        const chatInput = document.getElementById('chat-session-input');
-        const messagesContainer = document.getElementById('chat-session-messages');
+        const closeButton = document.getElementById('chat-widget-close-button');
+        const chatForm = document.getElementById('chat-widget-form');
+        const chatInput = document.getElementById('chat-widget-input');
+        const messagesContainer = document.getElementById('chat-widget-messages');
         const typingIndicator = document.getElementById('chat-typing-indicator');
 
-        // NOUVEAU: Le bouton de fermeture envoie un message à la page parente
+        // Le bouton de fermeture envoie un message à la page parente pour fermer le widget
         closeButton.addEventListener('click', function() {
             window.parent.postMessage('close-chat-widget', '*');
         });
 
         const getSessionId = () => {
             let sessionId = localStorage.getItem('chat_session_id');
-            if (!sessionId) {
-                sessionId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                localStorage.setItem('chat_session_id', sessionId);
-            }
+            if (!sessionId) sessionId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem('chat_session_id', sessionId);
             return sessionId;
         };
 
@@ -110,59 +99,45 @@
              const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
              let newText = text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-semibold">${url}</a>`);
              const phoneRegex = /(\+41[\s\d-]{7,}|0[0-9\s-]{9,})/g;
-             newText = newText.replace(phoneRegex, phone => {
-                 const cleanPhone = phone.replace(/[\s-()]/g, '');
-                 return `<a href="tel:${cleanPhone}" class="text-blue-600 hover:underline font-semibold">${phone}</a>`;
-             });
+             newText = newText.replace(phoneRegex, phone => `<a href="tel:${phone.replace(/[\s-()]/g, '')}" class="text-blue-600 hover:underline font-semibold">${phone}</a>`);
              return newText;
         };
 
         const addMessage = (text, sender) => {
             const messageWrapper = document.createElement('div');
-            messageWrapper.className = `chat-session-message flex ${sender === 'user' ? 'justify-end' : ''}`;
+            messageWrapper.className = `chat-message flex ${sender === 'user' ? 'justify-end' : ''}`;
             const messageDiv = document.createElement('div');
             messageDiv.className = 'p-3 rounded-2xl max-w-[85%] text-gray-800';
-            if (sender === 'user') {
-                messageDiv.classList.add('bg-blue-500', 'text-white', 'rounded-br-lg');
-            } else {
-                messageDiv.classList.add('bg-white/70', 'rounded-bl-lg');
-            }
+            if (sender === 'user') messageDiv.classList.add('bg-blue-500', 'text-white', 'rounded-br-lg');
+            else messageDiv.classList.add('bg-white/70', 'rounded-bl-lg');
             messageDiv.innerHTML = linkify(text);
             messageWrapper.appendChild(messageDiv);
             messagesContainer.insertBefore(messageWrapper, typingIndicator);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         };
 
-        const handleFormSubmit = (event) => {
+        chatForm.addEventListener('submit', (event) => {
             event.preventDefault();
             const userMessage = chatInput.value.trim();
             if (userMessage === '') return;
             addMessage(userMessage, 'user');
             chatInput.value = '';
-            typingIndicator.style.display = 'flex';
+            typingIndicator.style.display = 'block';
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             fetch(n8nWebhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: userMessage, sessionId: getSessionId() })
             })
-            .then(response => {
-                if (!response.ok) throw new Error(`Erreur réseau: ${response.statusText}`);
-                return response.json();
-            })
-            .then(data => {
-                if (data && data.reply) addMessage(data.reply, 'bot');
-                else addMessage("Désolé, je n'ai pas pu obtenir de réponse.", 'bot');
-            })
+            .then(response => response.ok ? response.json() : Promise.reject('Network error'))
+            .then(data => addMessage(data?.reply || "Désolé, une erreur est survenue.", 'bot'))
             .catch(error => {
-                console.error("Erreur Fetch:", error);
-                addMessage("Une erreur de connexion est survenue.", 'bot');
+                console.error("Erreur:", error);
+                addMessage("Erreur de connexion.", 'bot');
             })
             .finally(() => { typingIndicator.style.display = 'none'; });
-        };
-
-        chatForm.addEventListener('submit', handleFormSubmit);
-    })();
+        });
+    });
     </script>
 </body>
 </html>
